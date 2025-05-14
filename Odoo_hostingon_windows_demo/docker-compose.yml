@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  odoo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ODOO_VERSION: 17.0
+    container_name: odoo17
+    depends_on:
+      - db
+    ports:
+      - "8069:8069" # Odoo HTTP
+      - "8071:8071" # Odoo Cron/Workers (optional, if needed directly)
+      # - "8072:8072" # Odoo Longpolling (optional, for live chat, etc.)
+    volumes:
+      - ./config/odoo.conf:/etc/odoo/odoo.conf
+      - ./addons:/mnt/extra-addons
+      - odoo_data:/var/lib/odoo # Filestore and other Odoo data
+    # environment: # These will be primarily controlled by odoo.conf for an external DB
+    #   - HOST=your_external_db_host
+    #   - USER=your_external_db_user
+    #   - PASSWORD=your_external_db_password
+    restart: unless-stopped
+    networks:
+      - odoo_network
+
+volumes:
+  odoo_data:
+  # db_data: # REMOVE DB_DATA VOLUME
+
+networks:
+  odoo_network:
+    driver: bridge 
